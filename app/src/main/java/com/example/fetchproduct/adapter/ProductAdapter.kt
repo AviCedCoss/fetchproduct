@@ -23,10 +23,10 @@ constructor() : RecyclerView.Adapter<ProductAdapter.ViewHolder>() {
     // private lateinit var firebaseAnalytics: FirebaseAnalytics
     var presentmentcurrency: String? = null
     var whilistArray = JSONArray()
-    fun setData(products: List<Storefront.ProductEdge>?, activity: Activity, repository: Urls) {
+    fun setData(products: List<Storefront.ProductEdge>?, activity: Activity) {
         this.products = products as MutableList<Storefront.ProductEdge>
         this.activity = activity
-        this.repository = repository
+      //  this.repository = repository
         // firebaseAnalytics = Firebase.analytics
     }
 

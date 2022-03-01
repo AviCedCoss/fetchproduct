@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class ProductList(var urls: Urls):ViewModel() {
+class ProductList:ViewModel() {
 
     var cursor = "nocursor"
         set(cursor) {
@@ -28,6 +28,7 @@ class ProductList(var urls: Urls):ViewModel() {
 
     private fun getAllProducts() {
         val currency_list = ArrayList<Storefront.CurrencyCode>()
+        val urls= Urls()
         if (presentmentCurrency != "nopresentmentcurrency") {
             currency_list.add(Storefront.CurrencyCode.valueOf(presentmentCurrency!!))
         }
