@@ -1,9 +1,7 @@
 package com.example.fetchproduct.query
 
-import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.fetchproduct.MainActivity.Companion.context
 import com.example.fetchproduct.urls.Urls
 import com.shopify.buy3.GraphCallResult
 import com.shopify.buy3.Storefront
@@ -41,8 +39,7 @@ class ProductList(var urls: Urls):ViewModel() {
                     override fun onSuccessQuery(result: GraphCallResult<Storefront.QueryRoot>) {
                         invoke(result)
                     }
-                },
-                context = context
+                }
             )
         } catch (e: Exception) {
             e.printStackTrace()
@@ -93,7 +90,11 @@ class ProductList(var urls: Urls):ViewModel() {
         }
     }
 
-    fun ViewModel.doGraphQLQueryGraph(urls: Urls, query: Storefront.QueryRootQuery, customResponse: CustomResponse, context: Context) {
+    fun doGraphQLQueryGraph(
+        urls: Urls,
+        query: Storefront.QueryRootQuery,
+        customResponse: CustomResponse
+    ) {
         GlobalScope.launch(Dispatchers.Main) {
             val call = urls.graphClient.queryGraph(query)
             call.enqueue { result: GraphCallResult<Storefront.QueryRoot> ->
