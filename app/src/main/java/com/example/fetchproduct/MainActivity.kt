@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
         productListModel!!.filteredproducts.observe(
             this,
             Observer<MutableList<Storefront.ProductEdge>> { this.setRecylerData(it) })
-        productlist!!.addOnScrollListener(recyclerViewOnScrollListener)
+        binding?.rvItemList!!.addOnScrollListener(recyclerViewOnScrollListener)
 
     }
 
@@ -85,9 +85,8 @@ class MainActivity : AppCompatActivity() {
                         product_grid_adapter.setData(
                             this.products,
                             this,
-                            productListModel!!.urls
                         )
-                        productlist!!.adapter = product_grid_adapter
+                        binding?.rvItemList!!.adapter = product_grid_adapter
                     } else {
                         this.products!!.addAll(products)
                         product_grid_adapter.notifyDataSetChanged()
