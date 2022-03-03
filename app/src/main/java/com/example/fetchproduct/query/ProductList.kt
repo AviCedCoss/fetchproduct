@@ -1,7 +1,9 @@
 package com.example.fetchproduct.query
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.fetchproduct.MainActivity
 import com.example.fetchproduct.urls.Urls
 import com.shopify.buy3.GraphCallResult
 import com.shopify.buy3.Storefront
@@ -12,30 +14,16 @@ import kotlinx.coroutines.launch
 
 class ProductList:ViewModel() {
 
-    var cursor = "nocursor"
-        set(cursor) {
-            field = cursor
-            Response()
-        }
-    var isDirection = false
-    var keys: Storefront.ProductSortKeys? = null
-    var number = 10
-    var shopID = ""
     val message = MutableLiveData<String>()
-    val filteredproducts = MutableLiveData<MutableList<Storefront.ProductEdge>>()
+    var itemTitles:MutableList<String> = mutableListOf()
+    val titleItem = MutableLiveData<MutableList<Storefront.ProductEdge>>()
 
-    val presentmentCurrency: String?= null
-
-    private fun getAllProducts() {
-        val currency_list = ArrayList<Storefront.CurrencyCode>()
+    private fun testing() {
         val urls= Urls()
-        if (presentmentCurrency != "nopresentmentcurrency") {
-            currency_list.add(Storefront.CurrencyCode.valueOf(presentmentCurrency!!))
-        }
         try {
             doGraphQLQueryGraph(
                 urls,
-                Query.getAllProducts(cursor, keys, isDirection, number, currency_list),
+                Query.shopDetails,
                 customResponse = object : CustomResponse {
                     override fun onSuccessQuery(result: GraphCallResult<Storefront.QueryRoot>) {
                         invoke(result)
@@ -49,18 +37,16 @@ class ProductList:ViewModel() {
     }
 
     fun Response() {
-        if (!shopID.isEmpty()) {
-            getAllProducts()
-        }
+        testing()
     }
 
-    private operator fun invoke(result: GraphCallResult<Storefront.QueryRoot>): Unit {
+    private operator fun invoke(result: GraphCallResult<Storefront.QueryRoot>) {
         if (result is GraphCallResult.Success<*>) {
             consumeResponse(GraphQLResponse.success(result as GraphCallResult.Success<*>))
         } else {
             consumeResponse(GraphQLResponse.error(result as GraphCallResult.Failure))
         }
-        return Unit
+        return
     }
 
     private fun consumeResponse(reponse: GraphQLResponse) {
@@ -79,10 +65,23 @@ class ProductList:ViewModel() {
                     }
                     message.setValue(errormessage.toString())
                 } else {
-                    var edges: List<Storefront.ProductEdge>? = null
-                    if (!shopID.isEmpty()) {
-                        edges = result.data!!.products.edges
+                   var edges = result.data?.shop?.name
+                    Log.i("avinash",""+edges)
+                    val edgesSize = result.data!!.products.edges.size
+                    Log.i("avinash",""+edgesSize)
+                    var title =result.data?.products?.edges?.get(0)?.node?.title
+                    Log.i("avinash",""+title)
+                    var edge: List<Storefront.ProductEdge>? = null
+                    edge = result.data!!.products.edges
+                    titleItem.setValue(edge)
+                    var itr = edge.listIterator()
+                    while (itr.hasNext()){
+                        var edgeModel = itr.next()
+
+                       // main. = listOf(edgeModel.node.title)
+                        Log.i("avinash",""+edgeModel.node.title)
                     }
+
                 }
             }
             Status.ERROR -> message.setValue(reponse.error!!.error.message)
@@ -101,7 +100,6 @@ class ProductList:ViewModel() {
             call.enqueue { result: GraphCallResult<Storefront.QueryRoot> ->
                 GlobalScope.launch(Dispatchers.Main) {
                     customResponse.onSuccessQuery(result)
-
                 }
             }
         }

@@ -4,44 +4,30 @@ import com.shopify.buy3.Storefront
 
 object Query {
 
-    fun getAllProducts(
-        cursor: String,
-        sortby_key: Storefront.ProductSortKeys?,
-        direction: Boolean,
-        number: Int,
-        list_currency: List<Storefront.CurrencyCode>
-    ): Storefront.QueryRootQuery {
-        val shoppro: Storefront.QueryRootQuery.ProductsArgumentsDefinition
-        if (cursor == "nocursor") {
-            if (sortby_key != null) {
-                shoppro = Storefront.QueryRootQuery.ProductsArgumentsDefinition { args ->
-                    args.first(number).sortKey(sortby_key).reverse(direction)
-                }
-            } else {
-                shoppro = Storefront.QueryRootQuery.ProductsArgumentsDefinition { args ->
-                    args.first(number).reverse(direction)
-                }
-            }
-        } else {
-            if (sortby_key != null) {
-                shoppro = Storefront.QueryRootQuery.ProductsArgumentsDefinition { args ->
-                    args.first(number).after(cursor).sortKey(sortby_key).reverse(direction)
-                }
-            } else {
-                shoppro = Storefront.QueryRootQuery.ProductsArgumentsDefinition { args ->
-                    args.first(number).after(cursor).reverse(direction)
-                }
-            }
-        }
-        return Storefront.query { root ->
-            root.products(
-                shoppro,
-                productDefinition(list_currency)
-            )
-        }
-    }
+    val shopDetails: Storefront.QueryRootQuery
+        get() = Storefront.query { q ->
+            q
+                .shop { shop ->
+                    shop.name()
 
-    fun productDefinition(list_currency: List<Storefront.CurrencyCode>): Storefront.ProductConnectionQueryDefinition {
+                        .paymentSettings { pay ->
+                            pay.enabledPresentmentCurrencies().currencyCode()
+                        }
+
+                }
+                .products (getData(), productDefinition())
+
+        }
+
+fun getData():Storefront.QueryRootQuery.ProductsArgumentsDefinition{
+    val definition: Storefront.QueryRootQuery.ProductsArgumentsDefinition
+    definition = Storefront.QueryRootQuery.ProductsArgumentsDefinition { args ->
+        args.first(10).reverse(true)
+    }
+    return definition
+}
+
+    fun productDefinition(): Storefront.ProductConnectionQueryDefinition {
         return Storefront.ProductConnectionQueryDefinition { productdata ->
             productdata
                 .edges { edges ->
@@ -49,60 +35,9 @@ object Query {
                         .cursor()
                         .node { node ->
                             node
-                                .handle()
                                 .title()
-                                .images({ img -> img.first(10) }
-                                ) { imag ->
-                                    imag.edges { imgedge ->
-                                        imgedge
-                                            .node { imgnode ->
-                                                imgnode
-                                                    .originalSrc()
-                                                    .transformedSrc { t ->
-                                                        t
-                                                            .maxWidth(600)
-                                                            .maxHeight(600)
-                                                    }
-                                            }
-                                    }
-                                }
-                                .media({ m -> m.first(10) }) { me ->
-                                    me.edges { e ->
-                                        e.node { n ->
-                                            n.onMediaImage { media ->
-                                                media.previewImage { p ->
-                                                    p.originalSrc()
-                                                }
-                                            }
-                                                .onExternalVideo { _queryBuilder ->
-                                                    _queryBuilder.embeddedUrl()
-                                                        .previewImage {
-                                                            it.originalSrc()
-                                                        }
-                                                }
-                                                .onVideo(Storefront.VideoQueryDefinition {
-                                                    it.previewImage {
-                                                        it.originalSrc()
-                                                    }.sources { it ->
-                                                        it.url()
-                                                    }
-                                                })
-                                                .onModel3d { md ->
-                                                    md
-                                                        .sources { s -> s.url() }
-                                                        .previewImage { p -> p.originalSrc() }
-                                                }
-                                        }
-                                    }
-                                }
-                                .availableForSale()
-                                .descriptionHtml()
-                                .description()
-                                .tags()
-                                .vendor()
-                                .handle()
-                                .totalInventory()
-                                .variants({ args ->
+
+                               /* .variants({ args ->
                                     args
                                         .first(120)
                                 }
@@ -140,11 +75,11 @@ object Query {
                                                         .title()
                                                         .quantityAvailable()
                                                         .presentmentPrices(
-                                                            { arg ->
+                                                            *//*{ arg ->
                                                                 arg.first(25).presentmentCurrencies(
                                                                     list_currency
                                                                 )
-                                                            }
+                                                            }*//*
                                                         ) { price ->
                                                             price.edges { e ->
                                                                 e.cursor().node { n ->
@@ -182,7 +117,7 @@ object Query {
                                 .options { op ->
                                     op.name()
                                         .values()
-                                }
+                                }*/
                         }
                 }
                 .pageInfo(Storefront.PageInfoQueryDefinition { it.hasNextPage() }

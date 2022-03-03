@@ -2,16 +2,11 @@ package com.example.fetchproduct.urls
 
 import android.util.Log
 import com.example.fetchproduct.MainActivity
-import com.example.fetchproduct.repository.Repository
 import com.shopify.buy3.GraphClient
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
 class Urls {
-   // @Inject
-    lateinit var repository: Repository
-
-
 
     val shopdomain: String
         get() {
@@ -42,7 +37,6 @@ class Urls {
                 }
                 Unit
             }
-            // MagePrefs.getLanguage()
 
         }
 
